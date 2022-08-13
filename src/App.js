@@ -2,6 +2,8 @@ import "./App.css";
 import { useState, useEffect } from "react";
 import ButtonBar from "./components/ButtonBar";
 import Gallery from "./components/Gallery";
+import { useSelector, useDispatch, connect } from "react-redux";
+
 
 function App() {
   let [data, setData] = useState({});
@@ -39,4 +41,13 @@ function App() {
   );
 }
 
-export default App;
+const mapStateToProps = (state) => ({
+  objectId: state.data.objectId,
+});
+
+useEffect(() => {
+  dispatch(fetchData());
+}, [props.objectId, dispatch]);
+
+
+export default connect(mapStateToProps)(App);
