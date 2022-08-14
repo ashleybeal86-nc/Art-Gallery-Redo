@@ -1,53 +1,60 @@
 import "./App.css";
-import { useState, useEffect } from "react";
-import ButtonBar from "./components/ButtonBar";
-import Gallery from "./components/Gallery";
 import { useSelector, useDispatch, connect } from "react-redux";
+import {
+  clearData,
+  fetchData,
+  incrementId,
+  decrementId,
+  inputId,
+} from "./features/dataSlice";
+import { useEffect } from "react";
 
+function App(props) {
+  const dispatch = useDispatch();
+  const data = useSelector((state) => state.data);
 
-function App() {
-  let [data, setData] = useState({});
-  let [objectId, setObjectId] = useState(12770);
+  const renderImg = () => {
+    if (data.apiData) {
+      return (
+        <img
+          style={{ width: "100vw" }}
+          src={data.apiData.primaryImage}
+          alt={data.apiData.title}
+        />
+      );
+    } else {
+      return <p>image here</p>;
+    }
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      const response = await fetch(
-        `https://collectionapi.metmuseum.org/public/collection/v1/objects/${objectId}`
-      );
-      const resData = await response.json();
-      setData(resData);
-    }
-    document.title = "Welcome to Artworld";
-    fetchData();
-  }, [objectId]);
-
-  const handleIterate = (e) => {
-    setObjectId(objectId + Number(e.target.value));
-  };
-
-  const displayImage = () => {
-    if (!data.primaryImage) {
-      return <h2>No Image!</h2>;
-    }
-    return <Gallery objectImg={data.primaryImage} title={data.title} />;
-  };
+    dispatch(fetchData());
+  }, [props.objectId, dispatch]);
 
   return (
     <div className="App">
-      <h1>{data.title}</h1>
-      <div style={{ width: "100%" }}>{displayImage()}</div>
-      <ButtonBar handleIterate={handleIterate} />
+      <div>
+        <button onClick={() => dispatch(fetchData())}>Thunk!</button>
+        <button onClick={() => dispatch(clearData())}>Clear</button>
+        <button onClick={() => dispatch(incrementId())}>Next</button>
+        <button onClick={() => dispatch(decrementId())}>Back</button>
+      </div>
+      <input
+        value={data.objectId}
+        onChange={(e) => {
+          dispatch(inputId(Number(e.target.value)));
+        }}
+      />
+      <div>
+        {data.objectId}
+        {renderImg()}
+      </div>
     </div>
   );
 }
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state, ownProps) => ({
   objectId: state.data.objectId,
 });
-
-useEffect(() => {
-  dispatch(fetchData());
-}, [props.objectId, dispatch]);
-
 
 export default connect(mapStateToProps)(App);
